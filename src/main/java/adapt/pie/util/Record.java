@@ -7,7 +7,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
@@ -86,27 +88,62 @@ public class Record {
 		this.date = date;
 	}
 
-	public static List<Record> loadAll() {
-		List<Record> records = new ArrayList<Record>();
-		Configuration config = null;
-		try {
-			config = new HierarchicalINIConfiguration("pie-config.ini");
-		} catch (ConfigurationException e) {
-			e.printStackTrace();
-		}
+	private static List<Record> records = null;
+	private static Map<Integer, List<Record>> userRecords = null;
+	private static Map<Integer, List<Record>> itemRecords = null;
 
-		String path = config.getString("data.USER");
-		try {
-			CSVReader reader = new CSVReader(new InputStreamReader(
-					new FileInputStream(path)));
-			String[] strs = reader.readNext();
-			while( (strs = reader.readNext()) != null ) {
-				records.add(new Record(strs));
+	public static List<Record> loadAll() {
+		if (records == null) {
+			records = new ArrayList<Record>();
+			Configuration config = null;
+			try {
+				config = new HierarchicalINIConfiguration("pie-config.ini");
+			} catch (ConfigurationException e) {
+				e.printStackTrace();
 			}
-			reader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+
+			String path = config.getString("data.USER");
+			try {
+				CSVReader reader = new CSVReader(new InputStreamReader(
+						new FileInputStream(path)));
+				String[] strs = reader.readNext();
+				while ((strs = reader.readNext()) != null) {
+					records.add(new Record(strs));
+				}
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		return records;
 	}
+
+	public static Map<Integer, List<Record>> getUserRecords() {
+		if( userRecords == null ) {
+			userRecords = new HashMap<Integer, List<Record>>();
+			List<Record> records = loadAll();
+			for(Record r: records) {
+				Integer key = r.getUserId();
+				if( !userRecords.containsKey(key))
+					userRecords.put(key, new ArrayList<Record>());
+				userRecords.get(key).add(r);
+			}
+		}
+		return userRecords;
+	}
+	
+	public static Map<Integer, List<Record>> getItemRecords() {
+		if( itemRecords == null ) {
+			itemRecords = new HashMap<Integer, List<Record>>();
+			List<Record> records = loadAll();
+			for(Record r: records) {
+				Integer key = r.getItemId();
+				if( !itemRecords.containsKey(key))
+					itemRecords.put(key, new ArrayList<Record>());
+				itemRecords.get(key).add(r);
+			}
+		}
+		return itemRecords;
+	}
+	
 }
