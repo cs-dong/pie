@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +18,7 @@ import org.apache.commons.configuration.HierarchicalINIConfiguration;
 
 import au.com.bytecode.opencsv.CSVReader;
 
-public class Record {
+public class Record implements Comparable<Record> {
 
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH");
 	public int userId;
@@ -88,9 +89,12 @@ public class Record {
 		this.date = date;
 	}
 
+	public String toString() {
+		return userId + "\t" + itemId + "\t" + behaviorType + "\t"
+				+ userGeohash + "\t" + itemCategory + "\t" + sdf.format(date);
+	}
+
 	private static List<Record> records = null;
-	private static Map<Integer, List<Record>> userRecords = null;
-	private static Map<Integer, List<Record>> itemRecords = null;
 
 	public static List<Record> loadAll() {
 		if (records == null) {
@@ -114,36 +118,56 @@ public class Record {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			Collections.sort(records);
 		}
 		return records;
 	}
 
-	public static Map<Integer, List<Record>> getUserRecords() {
-		if( userRecords == null ) {
-			userRecords = new HashMap<Integer, List<Record>>();
-			List<Record> records = loadAll();
-			for(Record r: records) {
-				Integer key = r.getUserId();
-				if( !userRecords.containsKey(key))
-					userRecords.put(key, new ArrayList<Record>());
-				userRecords.get(key).add(r);
-			}
+	public static List<Record> getRecords(RecordFilter filter) {
+		List<Record> ret = new ArrayList<Record>();
+		List<Record> records = loadAll();
+		for (Record r : records) {
+			if (filter.accept(r))
+				ret.add(r);
+		}
+		return ret;
+	}
+
+	public static Map<Integer, List<Record>> getUserRecords(List<Record> records) {
+		Map<Integer, List<Record>> userRecords = new HashMap<Integer, List<Record>>();
+		for (Record r : records) {
+			Integer key = r.getUserId();
+			if (!userRecords.containsKey(key))
+				userRecords.put(key, new ArrayList<Record>());
+			userRecords.get(key).add(r);
 		}
 		return userRecords;
 	}
-	
-	public static Map<Integer, List<Record>> getItemRecords() {
-		if( itemRecords == null ) {
-			itemRecords = new HashMap<Integer, List<Record>>();
-			List<Record> records = loadAll();
-			for(Record r: records) {
-				Integer key = r.getItemId();
-				if( !itemRecords.containsKey(key))
-					itemRecords.put(key, new ArrayList<Record>());
-				itemRecords.get(key).add(r);
-			}
+
+	public static Map<Integer, List<Record>> getItemRecords(List<Record> record) {
+		Map<Integer, List<Record>> itemRecords = new HashMap<Integer, List<Record>>();
+		List<Record> records = loadAll();
+		for (Record r : records) {
+			Integer key = r.getItemId();
+			if (!itemRecords.containsKey(key))
+				itemRecords.put(key, new ArrayList<Record>());
+			itemRecords.get(key).add(r);
 		}
 		return itemRecords;
 	}
+
+	public int compareTo(Record o) {
+		if( date.before(o.getDate()))
+			return -1;
+		else if( date.after(o.getDate()))
+			return 1;
+		return 0;
+	}
 	
+	public static void main(String[] args) {
+		long start = System.currentTimeMillis();
+		List<Record> records = loadAll();
+		System.out.println(records.size());
+		System.out.println(System.currentTimeMillis() - start);
+	}
 }
