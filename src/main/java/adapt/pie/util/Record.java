@@ -20,7 +20,7 @@ import au.com.bytecode.opencsv.CSVReader;
 
 public class Record implements Comparable<Record> {
 
-	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH");
+	public static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH");
 	public int userId;
 	public int itemId;
 	public int behaviorType;
