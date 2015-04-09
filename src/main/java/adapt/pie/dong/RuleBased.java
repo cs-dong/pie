@@ -18,8 +18,8 @@ import adapt.pie.util.RecordFilter;
 
 public class RuleBased {
 	public static void main(String[] args) throws ConfigurationException, IOException, ParseException {
-		Date d = Record.sdf.parse("2014-12-18 18");
-		List<Record> records = Record.getRecords(new RecordFilter("2014-12-18 00", "2014-12-18 24"));
+		Date d = Record.sdf.parse("2014-12-17 18");
+		List<Record> records = Record.getRecords(new RecordFilter("2014-12-17 00", "2014-12-17 24"));
 		Set<String> shoppingcart = new HashSet<String>();
 		Set<String> buy = new HashSet<String>();
 		for( Record r: records) {
@@ -35,7 +35,7 @@ public class RuleBased {
 		System.out.println(shoppingcart.size());
 		Configuration config = new HierarchicalINIConfiguration("pie-config.ini");
 		
-		String path = config.getString("result.RULEBASED");
+		String path = config.getString("result.RULEBASEDTEST");
 		BufferedWriter bw = new BufferedWriter(new FileWriter(path));
 		bw.write("user_id,item_id");
 		bw.newLine();

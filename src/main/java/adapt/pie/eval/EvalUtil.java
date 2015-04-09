@@ -120,6 +120,6 @@ public class EvalUtil {
 	}
 	
 	public static void main(String[] args) throws IOException{
-		//test1();
+		test1();
 	}
 }
