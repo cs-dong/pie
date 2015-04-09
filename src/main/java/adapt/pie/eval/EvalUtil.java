@@ -5,13 +5,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-
 import java.util.List;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalINIConfiguration;
 
+import adapt.pie.util.Item;
 import adapt.pie.util.Record;
 import adapt.pie.util.RecordFilter;
 
@@ -41,7 +41,8 @@ public class EvalUtil {
 		
 		for (Record record : data){
 			if(record.getBehaviorType() == 4 
-					&& filter.accept(record)){
+					&& filter.accept(record)
+					&& Item.containsItem(record.getItemId())){ //商品子集P
 				
 				Integer userid = record.getUserId();
 				Integer itemid = record.getItemId();
