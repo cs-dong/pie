@@ -115,7 +115,7 @@ public class EvalUtil {
 	
 	public static void test1() throws IOException{
 		HashMap<Integer,HashMap<Integer,Integer>> testdatamap = 
-				SelectDataMap("2014-12-17 24","2014-12-18 24");
+				SelectDataMap("2014-12-18 24","2014-12-18 24");
 		
 		evaluate(testdatamap);
 	}
