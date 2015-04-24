@@ -3,9 +3,11 @@ package adapt.pie.dong;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,54 +25,58 @@ import adapt.pie.util.RecordFilter;
 
 public class RuleBased {
 
-	public static void main(String[] args) throws IOException {
-		System.out.println("2014-12-16");
-		run("2014-12-16", "2014-12-17");
-		System.out.println("2014-12-07");
-		run("2014-12-07", "2014-12-08");
-		System.out.println("2014-12-01");
-		run("2014-12-01", "2014-12-02");
-		System.out.println("2014-11-25");
-		run("2014-11-25", "2014-11-26");
+	public static void main(String[] args) throws IOException, ParseException {
+//		 run("2014-12-17", "2014-12-18");
+//		 run("2014-12-16", "2014-12-17");
+//		 run("2014-12-15", "2014-12-16");
+//		 run("2014-12-14", "2014-12-15");
+//		 run("2014-12-13", "2014-12-14");
+//		 run("2014-12-01", "2014-12-02");
+//		 run("2014-12-02", "2014-12-03");
+//		 run("2014-12-03", "2014-12-04");
+//		 run("2014-12-04", "2014-12-05");
+		// System.out.println("2014-12-01");
+		// run("2014-12-01", "2014-12-02");
+		// System.out.println("2014-11-25");
+		// run("2014-11-25", "2014-11-26");
+		System.out.println("start...");
+		run("2014-12-18", "");
 	}
 
-	public static void run(String d1, String d2) throws IOException {
+	public static void run(String d1, String d2) throws IOException, ParseException {
+		List<Record> total = Record.getRecords(new RecordFilter(d1 + " 00", d1
+				+ " 24"));
+		Date d = Record.sdf.parse(d1 + " 18");
 		List<Record> recommend = candidate(d1);
 		Collections.reverse(recommend);
 		Set<String> rec = new HashSet<String>();
-		for (int i = 0; i < 450 && i < recommend.size(); ++i) {
+		for (int i = 0; i < recommend.size(); ++i) {
 			Record r = recommend.get(i);
-			rec.add(r.getUserId() + "," + r.getItemId());
+			if( r.getDate().after(d)) {
+				rec.add(r.getUserId() + "," + r.getItemId());
+				System.out.println(r);
+			}
+//			int j = 0;
+//			for (j = 0; j < total.size(); ++j) {
+//				Record r1 = total.get(j);
+//				if (r.getUserId() == r1.getUserId()
+//						&& (r.getDate().equals(r1.getDate()) || r.getDate()
+//								.before(r1.getDate()))
+//						&& r1.getBehaviorType() == 4)
+//					break;
+//			}
+//			if( j < total.size() )
+//				System.out.println(r);
+//			if (j == total.size() && !r.getDate().before(d)) {
+//				rec.add(r.getUserId() + "," + r.getItemId());
+//			}
 		}
-		write(rec);
+		//write(rec);
+		System.out.println(recommend.size());
 		System.out.println(rec.size());
-		HashMap<Integer, HashMap<Integer, Integer>> testdatamap = EvalUtil
-				.SelectDataMap(d2 + " 00", d2 + " 24");
-		EvalUtil.evaluate(testdatamap);
-		
-		recommend = rule1(d1);
-		Collections.reverse(recommend);
-		rec = new HashSet<String>();
-		for (int i = 0; i < 450 && i < recommend.size(); ++i) {
-			Record r = recommend.get(i);
-			rec.add(r.getUserId() + "," + r.getItemId());
-		}
-		write(rec);
-		System.out.println(rec.size());
-		testdatamap = EvalUtil.SelectDataMap(d2 + " 00", d2 + " 24");
-		EvalUtil.evaluate(testdatamap);
-		
-		recommend = rule2(d1);
-		Collections.reverse(recommend);
-		rec = new HashSet<String>();
-		for (int i = 0; i < 450 && i < recommend.size(); ++i) {
-			Record r = recommend.get(i);
-			rec.add(r.getUserId() + "," + r.getItemId());
-		}
-		write(rec);
-		System.out.println(rec.size());
-		testdatamap = EvalUtil.SelectDataMap(d2 + " 00", d2 + " 24");
-		EvalUtil.evaluate(testdatamap);
+//		 HashMap<Integer, HashMap<Integer, Integer>> testdatamap = EvalUtil
+//		 .SelectDataMap(d2 + " 00", d2 + " 24");
+//		 EvalUtil.evaluate(testdatamap);
 	}
 
 	public static List<Record> rule1(String d1) {
@@ -156,12 +162,11 @@ public class RuleBased {
 		}
 		return ret;
 	}
-	
+
 	public static void write(Set<String> rec) {
 		Configuration config;
 		try {
-			config = new HierarchicalINIConfiguration(
-					"pie-config.ini");
+			config = new HierarchicalINIConfiguration("pie-config.ini");
 			String path = config.getString("result.RULEBASEDTEST");
 			BufferedWriter bw = new BufferedWriter(new FileWriter(path));
 			bw.write("user_id,iter_id");
